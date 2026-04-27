@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para mi vida, Yerika</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABLES DE ALTA COSTURA --- */
+        :root {
+            --champagne-gold: #d4b58e;
+            --muted-gold: #a68c6d;
+            --soft-white: #f4f0ec;
+            --obsidian: #050505;
+            --cinematic-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --slow-breath: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: var(--obsidian);
+            color: var(--soft-white);
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden; /* Controlado por el wrapper */
+        }
+
+        /* --- 1. GRANO DE PELÍCULA ANALÓGICA --- */
+        /* Añade textura y profundidad, rompiendo el aspecto digital "plano" */
+        .film-grain {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.06; /* Extremadamente sutil */
+            mix-blend-mode: overlay;
+        }
+
+        /* --- 2. PRELOADER CINEMATOGRÁFICO --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--obsidian);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 2s var(--cinematic-ease), visibility 2s;
+        }
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .loader-ring {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(212, 181, 142, 0.2);
+            border-top-color: var(--champagne-gold);
+            border-radius: 50%;
+            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+        .loader-text {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            color: var(--muted-gold);
+            font-weight: 200;
+            animation: pulse-text 3s infinite alternate;
+        }
+
+        /* --- 3. CONTENEDOR PRINCIPAL Y PARALLAX SCROLL --- */
+        .app-wrapper {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        .app-wrapper::-webkit-scrollbar { display: none; }
+
+        /* --- 4. ESCENAS (GALERÍA) --- */
+        .scene {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Envoltura de imagen para el efecto Ken Burns (respiración) */
+        .bg-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Viñeta para centrar la atención en el texto y rostros */
+        .bg-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 20%, rgba(5,5,5,0.85) 100%),
+                        linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.7) 100%);
+            z-index: 2;
+        }
+
+        .bg-img {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: saturate(0.65) contrast(1.1) brightness(0.7);
+            transform: scale(1.15) translateY(5%);
+            transform-origin: center 40%;
+            transition: transform 15s var(--slow-breath), filter 3s ease;
+            will-change: transform;
+        }
+
+        .scene.is-active .bg-img {
+            transform: scale(1) translateY(0); /* Respiración profunda y lenta al entrar */
+            filter: saturate(0.8) contrast(1.1) brightness(0.9);
+        }
+
+        /* --- 5. TIPOGRAFÍA EDITORIAL --- */
+        .text-overlay {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 90vw;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .text-overlay h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 300;
+            font-style: italic;
+            line-height: 1.1;
+            color: var(--soft-white);
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 2s var(--cinematic-ease), transform 2.5s var(--cinematic-ease);
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .text-overlay p {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(0.6rem, 2vw, 0.75rem);
+            text-transform: uppercase;
+            letter-spacing: 0.4em; /* Kerning muy amplio para el look de lujo */
+            font-weight: 300;
+            color: var(--champagne-gold);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 2s var(--cinematic-ease), transform 2.5s var(--cinematic-ease);
+            transition-delay: 0.4s; /* Cascada de animaciones */
+        }
+
+        .scene.is-active h2 { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        .scene.is-active p { 
+            opacity: 0.85; 
+            transform: translateY(0); 
+        }
+
+        /* Línea decorativa sutil */
+        .text-overlay::after {
+            content: '';
+            width: 0;
+            height: 1px;
+            background: var(--champagne-gold);
+            margin-top: 30px;
+            opacity: 0;
+            transition: width 2s var(--cinematic-ease), opacity 2s ease;
+            transition-delay: 0.8s;
+        }
+        .scene.is-active .text-overlay::after {
+            width: 40px;
+            opacity: 0.5;
+        }
+
+        /* --- 6. CONTROLES MINIMALISTAS --- */
+        .music-toggle {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            opacity: 0.6;
+            transition: opacity 0.4s ease;
+        }
+        .music-toggle:hover { opacity: 1; }
+
+        .mu-text {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--champagne-gold);
+            font-weight: 300;
+        }
+
+        .wave-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 12px;
+        }
+        .wave-line {
+            width: 1px;
+            background: var(--champagne-gold);
+            height: 3px;
+            transition: height 0.3s var(--cinematic-ease);
+        }
+        .playing .wave-line { animation: equalizer 1s infinite ease-in-out; }
+        .playing .wave-line:nth-child(1) { animation-delay: 0.0s; }
+        .playing .wave-line:nth-child(2) { animation-delay: 0.3s; }
+        .playing .wave-line:nth-child(3) { animation-delay: 0.15s; }
+
+        /* --- ANIMACIONES KEYFRAMES --- */
+        @keyframes equalizer {
+            0%, 100% { height: 3px; }
+            50% { height: 12px; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse-text {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* --- CANVAS PARTICLES --- */
+        #canvas-ambient {
+            position: fixed;
+            inset: 0;
+            pointer-events: none; /* No bloquea clics ni scroll */
+            z-index: 5;
+        }
+
+        /* --- RESPONSIVE MOBILE --- */
+        @media (max-width: 768px) {
+            .music-toggle { bottom: 20px; right: 20px; }
+            .text-overlay p { letter-spacing: 0.25em; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="film-grain"></div>
+
+    <div id="loader">
+        <div class="loader-content">
+            <div class="loader-ring"></div>
+            <p class="loader-text">Afinando memorias</p>
+        </div>
+    </div>
+
+    <canvas id="canvas-ambient"></canvas>
+
+    <audio id="audio-track" loop>
+        <source src="audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-toggle" onclick="togglePlay()" id="music-btn">
+        <span class="mu-text" id="mu-text">Sound Off</span>
+        <div class="wave-container" id="wave">
+            <div class="wave-line"></div>
+            <div class="wave-line"></div>
+            <div class="wave-line"></div>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('marco decorado.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>Yerika</h2>
+                <p>Nuestra eternidad en pixeles</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('beso de joe.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>El suspiro del alma</h2>
+                <p>Donde las palabras sobran</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('de frente.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>Tus ojos, mi mapa</h2>
+                <p>Para no perderme nunca</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('beso de yeri.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>Refugio</h2>
+                <p>Eres mi paz en medio del caos</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('de frente 2.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>Complicidad</h2>
+                <p>Lo que el mundo no ve, pero nosotros sentimos</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-wrap"><div class="bg-img" style="background-image: url('beso de yeri 2.jpg');"></div></div>
+            <div class="text-overlay">
+                <h2>Infinito</h2>
+                <p>Te amo, hoy y siempre</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /** * LÓGICA DE LA APLICACIÓN
+         * Escrita para fluidez y alto rendimiento.
+         */
+
+        // --- 1. SECUENCIA DE INICIO (PRELOADER) ---
+        window.addEventListener('load', () => {
+            // Damos un pequeño respiro antes de mostrar la primera escena
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                
+                // Dispara la animación de la primera escena
+                document.querySelector('.scene').classList.add('is-active');
+
+                setTimeout(() => loader.style.visibility = 'hidden', 2000);
+            }, 2500); // 2.5s de expectativa
+        });
+
+        // --- 2. CONTROL DE AUDIO (Suave y elegante) ---
+        const audio = document.getElementById('audio-track');
+        const wave = document.getElementById('wave');
+        const textBtn = document.getElementById('mu-text');
+        
+        // Volumen suave para que no asuste al iniciar
+        audio.volume = 0.4; 
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    wave.classList.add('playing');
+                    textBtn.innerText = "Sound On";
+                }).catch(e => console.log("Interacción requerida para audio"));
+            } else {
+                // Fade out manual simulado para el pause
+                let vol = audio.volume;
+                let fadeOut = setInterval(() => {
+                    if(vol > 0.05) {
+                        vol -= 0.05;
+                        audio.volume = vol;
+                    } else {
+                        clearInterval(fadeOut);
+                        audio.pause();
+                        audio.volume = 0.4; // Resetear volumen
+                        wave.classList.remove('playing');
+                        textBtn.innerText = "Sound Off";
+                    }
+                }, 50);
+            }
+        }
+
+        // --- 3. DIRECTOR DE ESCENAS (Intersection Observer) ---
+        // Se encarga de activar las animaciones solo cuando la escena está a la vista
+        const observerOptions = {
+            root: document.querySelector('.app-wrapper'),
+            threshold: 0.6 // La escena debe estar al 60% visible para activarse
+        };
+
+        const sceneObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('is-active');
+                } else {
+                    // Quitamos la clase para que el efecto Ken Burns se reinicie
+                    entry.target.classList.remove('is-active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scene').forEach(scene => sceneObserver.observe(scene));
+
+        // --- 4. SISTEMA DE LUCIÉRNAGAS (Polvo de estrellas cinemático) ---
+        const canvas = document.getElementById('canvas-ambient');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+        let mouse = { x: null, y: null };
+
+        // Seguir el ratón o el dedo para interacción sutil
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Firefly {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.baseSize = Math.random() * 1.5 + 0.5;
+                this.size = this.baseSize;
+                this.speedX = (Math.random() - 0.5) * 0.2;
+                this.speedY = (Math.random() - 0.5) * 0.2 - 0.1; // Tendencia ligera a subir
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.glow = Math.random() * 10 + 5;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                // Movimiento oscilante natural
+                this.angle += 0.02;
+                this.x += this.speedX + Math.sin(this.angle) * 0.1;
+                this.y += this.speedY;
+
+                // Interacción suave con el ratón/toque
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        // Se alejan lentamente del cursor
+                        this.x -= dx * 0.005;
+                        this.y -= dy * 0.005;
+                    }
+                }
+
+                // Parpadeo suave
+                this.opacity = 0.3 + Math.sin(this.angle * 2) * 0.2;
+
+                // Reset si salen de la pantalla
+                if (this.x < 0 || this.x > width || this.y < -50 || this.y > height + 50) {
+                    this.reset();
+                    // Para que aparezcan de forma natural, las mandamos abajo o a los lados
+                    this.y = height + 10; 
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                
+                // Efecto de brillo (Glow)
+                ctx.shadowBlur = this.glow;
+                ctx.shadowColor = `rgba(212, 181, 142, ${this.opacity})`;
+                ctx.fillStyle = `rgba(244, 240, 236, ${this.opacity})`;
+                
+                ctx.fill();
+                ctx.shadowBlur = 0; // Reset para el rendimiento
+            }
+        }
+
+        // Crear la cantidad justa de partículas para elegancia (no demasiadas)
+        const particleCount = window.innerWidth < 768 ? 40 : 80;
+        for(let i=0; i < particleCount; i++) {
+            particles.push(new Firefly());
+        }
+
+        function renderCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => { 
+                p.update(); 
+                p.draw(); 
+            });
+            requestAnimationFrame(renderCanvas);
+        }
+        renderCanvas();
+
+    </script>
+</body>
+</html>
