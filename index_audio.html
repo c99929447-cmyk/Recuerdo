@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Yerika</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS ANTERIORES MANTENIDOS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #fdfbf7; --accent: #e5b299; --dark: #2a2522; }
+
+        body, html {
+            width: 100%; height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--dark);
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%; height: 100vh;
+            overflow-y: scroll; overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .app-container::-webkit-scrollbar { display: none; }
+
+        #canvas-particles {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 10;
+        }
+
+        .scene {
+            position: relative; width: 100vw; height: 100vh;
+            scroll-snap-align: start; display: flex;
+            align-items: flex-end; justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-image {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            filter: brightness(0.6) contrast(1.1);
+            transform: scale(1); transition: transform 10s linear;
+        }
+        .scene.is-active .bg-image { transform: scale(1.15); }
+
+        .content {
+            position: relative; z-index: 20;
+            width: 90%; max-width: 600px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px; padding: 2.5rem 2rem;
+            text-align: center; color: white;
+            margin-bottom: 12vh;
+            opacity: 0; transform: translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .scene.is-active .content { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+
+        h2 { font-family: 'Playfair Display', serif; font-size: 2.4rem; margin-bottom: 0.5rem; }
+        h2 i { color: var(--accent); font-style: italic; }
+
+        /* --- NUEVO: ESTILO DEL CONTROL DE AUDIO --- */
+        .music-control {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .music-control:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .music-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            box-shadow: 0 0 15px rgba(229, 178, 153, 0.4);
+        }
+
+        .music-text {
+            color: white;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        /* Animación para el icono cuando suena */
+        .playing .music-icon {
+            animation: pulse-music 1.5s infinite;
+        }
+
+        @keyframes pulse-music {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 178, 153, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(229, 178, 153, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229, 178, 153, 0); }
+        }
+
+        .intro-scene h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 1rem; color: white; }
+        .scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); color: white; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.6; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { bottom: 40px; } 50% { bottom: 55px; } }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-particles"></canvas>
+
+    <audio id="main-audio" loop>
+        <source src="audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-control" id="music-trigger" onclick="toggleAudio()">
+        <div class="music-text" id="status-text">Activar Música</div>
+        <div class="music-icon">♪</div>
+    </div>
+
+    <div class="app-container">
+        
+        <section class="scene intro-scene is-active">
+            <div class="bg-image" style="background-image: url('marco decorado.jpg');"></div>
+            <div class="content" style="background: transparent; border: none; backdrop-filter: none;">
+                <h1>Para <i>Yerika</i></h1>
+                <p>Un viaje por nuestros mejores días</p>
+            </div>
+            <div class="scroll-hint">DESLIZA</div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-image" style="background-image: url('beso de joe.jpg');"></div>
+            <div class="content">
+                <h2>Nuestro <i>Beso</i></h2>
+                <p>El mundo se detiene cuando estamos así.</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-image" style="background-image: url('de frente.jpg');"></div>
+            <div class="content">
+                <h2>Esa <i>Sonrisa</i></h2>
+                <p>La luz que ilumina incluso mis días más grises.</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-image" style="background-image: url('beso de yeri.jpg');"></div>
+            <div class="content">
+                <h2>Cerca de <i>Ti</i></h2>
+                <p>Donde el corazón encuentra su hogar.</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-image" style="background-image: url('de frente 2.jpg');"></div>
+            <div class="content">
+                <h2>Tus <i>Ojos</i></h2>
+                <p>Mi paisaje favorito en todo el universo.</p>
+            </div>
+        </section>
+
+        <section class="scene">
+            <div class="bg-image" style="background-image: url('beso de yeri 2.jpg');"></div>
+            <div class="content">
+                <h2>Hoy y <i>Siempre</i></h2>
+                <p>Gracias por ser mi mejor aventura. Te amo.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- LÓGICA DE AUDIO ---
+        const audio = document.getElementById('main-audio');
+        const musicTrigger = document.getElementById('music-trigger');
+        const statusText = document.getElementById('status-text');
+
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play();
+                musicTrigger.classList.add('playing');
+                statusText.innerText = "Música ON";
+            } else {
+                audio.pause();
+                musicTrigger.classList.remove('playing');
+                statusText.innerText = "Música OFF";
+            }
+        }
+
+        // --- INTERSECTION OBSERVER ---
+        const scenes = document.querySelectorAll('.scene');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('is-active');
+                else entry.target.classList.remove('is-active');
+            });
+        }, { threshold: 0.55 });
+
+        scenes.forEach(scene => observer.observe(scene));
+
+        // --- PARTÍCULAS BOKEH ---
+        const canvas = document.getElementById('canvas-particles');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class P {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * w;
+                this.y = h + 50;
+                this.s = Math.random() * 4 + 1;
+                this.v = Math.random() * 0.8 + 0.3;
+                this.o = Math.random() * 0.4 + 0.1;
+            }
+            update() {
+                this.y -= this.v;
+                if (this.y < -50) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(229, 178, 153, ${this.o})`;
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<50; i++) particles.push(new P());
+
+        function anim() {
+            ctx.clearRect(0,0,w,h);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(anim);
+        }
+        anim();
+    </script>
+</body>
+</html>
